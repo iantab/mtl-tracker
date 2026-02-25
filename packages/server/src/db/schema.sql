@@ -25,11 +25,16 @@ CREATE TABLE IF NOT EXISTS routes (
 
 CREATE TABLE IF NOT EXISTS stops (
   id        TEXT PRIMARY KEY,
-  route_id  TEXT REFERENCES routes(id),  -- nullable: GTFS stops serve multiple routes
   name      TEXT NOT NULL,
   lat       DOUBLE PRECISION NOT NULL,
   lon       DOUBLE PRECISION NOT NULL,
   sequence  INT NOT NULL DEFAULT 0
+);
+
+CREATE TABLE IF NOT EXISTS trips (
+  id        TEXT PRIMARY KEY,  -- trip_id
+  route_id  TEXT NOT NULL REFERENCES routes(id),
+  headsign  TEXT               -- direction or destination, e.g. "Est", "O"
 );
 
 -- Shape points for metro line animation (fixed track geometry)

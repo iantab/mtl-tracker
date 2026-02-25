@@ -34,11 +34,13 @@ class VehicleCache {
       const latDelta = Math.abs(v.lat - prev.lat);
       const lonDelta = Math.abs(v.lon - prev.lon);
       const bearingChanged = v.bearing !== prev.bearing;
+      const headsignChanged = v.headsign !== prev.headsign;
 
       if (
         latDelta > POSITION_THRESHOLD_DEG ||
         lonDelta > POSITION_THRESHOLD_DEG ||
-        bearingChanged
+        bearingChanged ||
+        headsignChanged
       ) {
         changed.push(v);
       }

@@ -37,6 +37,7 @@ export async function loadGtfsStatic() {
 
   await seedAgency();
   await seedRoutes(read("routes.txt"));
+  await seedTrips(read("trips.txt"));
   await seedStops(read("stops.txt"));
   await seedShapes(read("shapes.txt"));
   await warmStaticCache();
@@ -103,6 +104,23 @@ async function seedRoutes(routesCsv: string) {
     `;
   }
   console.log(`  ✔ ${routes.length} routes seeded`);
+}
+
+async function seedTrips(tripsCsv: string) {
+  const rows = parseCsv(tripsCsv);
+  const trips = rows.map((t) => ({
+    id: t.trip_id,
+    route_id: `STM-${t.route_id}`,
+    headsign: t.trip_headsign || null,
+  }));
+
+  for (let i = 0; i < trips.length; i += 2000) {
+    await sql`
+      INSERT INTO trips ${sql(trips.slice(i, i + 2000), "id", "route_id", "headsign")}
+      ON CONFLICT (id) DO NOTHING
+    `;
+  }
+  console.log(`  ✔ ${trips.length} trips seeded`);
 }
 
 async function seedStops(stopsCsv: string) {

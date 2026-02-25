@@ -37,6 +37,10 @@ export function startPoller() {
         console.error("Bus poller error:", busResult.reason);
       if (metroResult.status === "rejected")
         console.error("Metro poller error:", metroResult.reason);
+      if (metroResult.status === "fulfilled" && metros.length === 0)
+        console.warn(
+          "⚠️  Metro feed returned 0 vehicles — off-peak, stop ID mismatch, or empty feed",
+        );
 
       const all = [...buses, ...metros];
       if (all.length === 0) return;

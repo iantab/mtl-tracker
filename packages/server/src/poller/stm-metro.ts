@@ -1,5 +1,6 @@
 import { transit_realtime } from "gtfs-realtime-bindings";
 import type { VehicleState } from "../types/transit";
+import { getCachedStopById, getCachedTripById } from "../cache/staticCache";
 
 const STM_API_KEY = process.env.STM_API_KEY;
 const TRIP_UPDATES_URL =
@@ -72,38 +73,62 @@ export async function fetchStmMetroUpdates(): Promise<VehicleState[]> {
     const vehicleId = `metro-${tu.trip.routeId}-${tu.trip.tripId ?? entity.id}`;
     const routeId = `STM-${tu.trip.routeId}`;
 
-    // Calculate delay from the most recent stop time update
+    // Calculate delay from the most recent stop time update.
+    // `.delay` is the signed seconds offset from schedule (per GTFS-RT spec);
+    // it is a separate field from `.time` (unix epoch seconds).
     const lastUpdate = prevStop ?? nextStop;
-    const scheduled = Number(
-      lastUpdate.arrival?.time ?? lastUpdate.departure?.time ?? 0,
-    );
-    const actual = Number(
-      (lastUpdate.arrival?.time != null
-        ? lastUpdate.arrival
-        : lastUpdate.departure
-      )?.delay ?? 0,
-    );
+    const actual =
+      lastUpdate.arrival?.delay ?? lastUpdate.departure?.delay ?? 0;
+
+    // Look up stop coordinates directly by stopId from the GTFS-RT feed
+    const nextStopData = getCachedStopById(nextStop.stopId ?? "");
+    const prevStopData =
+      nextStopIdx > 0
+        ? getCachedStopById(stopTimes[nextStopIdx - 1].stopId ?? "")
+        : null;
+
+    // Guard: if we couldn't resolve the next stop's coordinates, skip this
+    // vehicle entirely rather than emitting it at (0, 0) in the ocean.
+    if (!nextStopData) continue;
+
+    // Lerp between prev and next stop; fall back to next stop position alone
+    let lat = nextStopData.lat;
+    let lon = nextStopData.lon;
+    if (prevStopData && fraction < 1) {
+      lat = prevStopData.lat + (nextStopData.lat - prevStopData.lat) * fraction;
+      lon = prevStopData.lon + (nextStopData.lon - prevStopData.lon) * fraction;
+    }
+
+    // Compute bearing from prev→next stop
+    let bearing: number | null = null;
+    if (prevStopData) {
+      const dLon = ((nextStopData.lon - prevStopData.lon) * Math.PI) / 180;
+      const lat1 = (prevStopData.lat * Math.PI) / 180;
+      const lat2 = (nextStopData.lat * Math.PI) / 180;
+      const y = Math.sin(dLon) * Math.cos(lat2);
+      const x =
+        Math.cos(lat1) * Math.sin(lat2) -
+        Math.sin(lat1) * Math.cos(lat2) * Math.cos(dLon);
+      bearing = ((Math.atan2(y, x) * 180) / Math.PI + 360) % 360;
+    }
 
     vehicles.push({
       id: vehicleId,
       tripId: tu.trip.tripId ?? null,
       routeId,
       type: "metro",
-      // Lat/lon are placeholders — the frontend will interpolate along the shape
-      // using nextStopSequence and fraction passed in the properties
-      lat: 0,
-      lon: 0,
-      bearing: null,
+      lat,
+      lon,
+      bearing,
       speed: null,
       delaySec: actual,
-      occupancy: "UNKNOWN", // metro feed doesn't include occupancy
+      occupancy: "UNKNOWN",
       updatedAt: new Date().toISOString(),
-      // Extra fields used by the frontend position inference engine
-      // (attached as non-VehicleState keys for the WS payload)
-      ...({
-        nextStopSequence: nextStop.stopSequence ?? null,
-        interpolationFraction: fraction,
-      } as any),
+      headsign: tu.trip.tripId
+        ? (getCachedTripById(tu.trip.tripId)?.headsign ?? null)
+        : null,
+      nextStopSequence: nextStop.stopSequence ?? null,
+      interpolationFraction: fraction,
     });
   }
 

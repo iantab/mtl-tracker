@@ -2,7 +2,6 @@
   "name": "mtl-tracker",
   "private": true,
   "scripts": {
-    "dev": "bun run --filter './packages/*' dev",
     "prepare": "husky",
     "format": "prettier --write ."
   },

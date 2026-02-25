@@ -1,5 +1,6 @@
 import { transit_realtime } from "gtfs-realtime-bindings";
 import type { VehicleState, OccupancyStatus } from "../types/transit";
+import { getCachedTripById } from "../cache/staticCache";
 
 const STM_API_KEY = process.env.STM_API_KEY;
 const VEHICLE_POSITIONS_URL =
@@ -57,7 +58,17 @@ export async function fetchStmBusVehicles(): Promise<VehicleState[]> {
       delaySec: null, // buses get delay from TripUpdate, not VehiclePosition
       occupancy: OCCUPANCY_MAP[v.occupancyStatus ?? -1] ?? "UNKNOWN",
       updatedAt: new Date().toISOString(),
+      headsign: v.trip?.tripId
+        ? (getCachedTripById(v.trip.tripId)?.headsign ?? null)
+        : null,
     });
+
+    if (vehicles.length === 1 && v.trip?.tripId) {
+      console.log(
+        `[TRACE] Bus tripId type: ${typeof v.trip.tripId}, value: '${v.trip.tripId}', cached:`,
+        getCachedTripById(v.trip.tripId),
+      );
+    }
   }
 
   return vehicles;

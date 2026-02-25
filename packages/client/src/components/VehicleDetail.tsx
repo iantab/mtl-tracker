@@ -25,22 +25,25 @@ export const VehicleDetail = memo(function VehicleDetail() {
       <button style={styles.close} onClick={() => close(null)}>
         ✕
       </button>
-      <div style={styles.route}>{v.routeId.replace("STM-", "")}</div>
+      <div style={styles.route}>
+        {v.routeId.replace("STM-", "")}
+        {v.headsign ? ` - ${v.headsign}` : ""}
+      </div>
       <div style={styles.type}>
         {v.type === "metro" ? "🚇 Metro" : "🚌 Bus"}
       </div>
       <div style={styles.row}>
         <span>Delay</span>
-        <span>{delay}</span>
+        <span style={styles.rowValue}>{delay}</span>
       </div>
       <div style={styles.row}>
         <span>Occupancy</span>
-        <span>{v.occupancy.replace(/_/g, " ")}</span>
+        <span style={styles.rowValue}>{v.occupancy.replace(/_/g, " ")}</span>
       </div>
       {v.speed != null && (
         <div style={styles.row}>
           <span>Speed</span>
-          <span>{v.speed} km/h</span>
+          <span style={styles.rowValue}>{v.speed} km/h</span>
         </div>
       )}
     </div>
@@ -71,9 +74,15 @@ const styles: Record<string, React.CSSProperties> = {
   row: {
     display: "flex",
     justifyContent: "space-between",
+    gap: 12,
     fontSize: 13,
     color: "#ccc",
     padding: "3px 0",
     borderBottom: "1px solid rgba(255,255,255,0.06)",
+  },
+  rowValue: {
+    textAlign: "right",
+    color: "#fff",
+    whiteSpace: "nowrap",
   },
 };

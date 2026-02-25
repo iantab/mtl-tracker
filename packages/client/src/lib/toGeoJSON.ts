@@ -24,6 +24,7 @@ export function buildGeoJSON(
         occupancy: v.occupancy,
         delaySec: v.delaySec,
         updatedAt: v.updatedAt,
+        headsign: v.headsign,
       },
     }));
 

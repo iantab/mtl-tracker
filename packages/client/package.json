@@ -10,7 +10,6 @@
   },
   "dependencies": {
     "@elysiajs/eden": "latest",
-    "@mtl-tracker/server": "workspace:*",
     "@mtl-tracker/shared": "workspace:*",
     "maplibre-gl": "^4.7.1",
     "react": "^19.0.0",
@@ -20,6 +19,7 @@
     "date-fns": "^4.1.0"
   },
   "devDependencies": {
+    "@mtl-tracker/server": "workspace:*",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
     "@vitejs/plugin-react": "^4.3.4",

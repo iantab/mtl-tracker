@@ -29,6 +29,7 @@ export interface VehicleState {
   delaySec: number | null; // seconds behind schedule (negative = early)
   occupancy: OccupancyStatus;
   updatedAt: string; // ISO 8601 timestamp
+  headsign: string | null; // e.g. "Est", "O", Name of destination
   // Metro-only inference fields (computed from GTFS-RT TripUpdate)
   nextStopSequence?: number | null;
   interpolationFraction?: number;

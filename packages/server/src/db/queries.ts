@@ -12,20 +12,18 @@ import type { VehicleState, OccupancySnapshot } from "../types/transit";
 export async function insertVehiclePositions(vehicles: VehicleState[]) {
   if (vehicles.length === 0) return;
 
-  const rows = vehicles.map(
-    (v) =>
-      [
-        v.id,
-        v.routeId,
-        v.tripId ?? undefined,
-        v.lat,
-        v.lon,
-        v.bearing ?? undefined,
-        v.speed ?? undefined,
-        v.delaySec ?? undefined,
-        v.occupancy,
-      ] as unknown as (string | number)[],
-  );
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const rows: any[][] = vehicles.map((v) => [
+    v.id,
+    v.routeId,
+    v.tripId ?? null,
+    v.lat,
+    v.lon,
+    v.bearing ?? null,
+    v.speed ?? null,
+    v.delaySec ?? null,
+    v.occupancy,
+  ]);
 
   await sql`
     INSERT INTO vehicle_positions
