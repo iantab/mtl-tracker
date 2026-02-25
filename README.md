@@ -27,7 +27,7 @@ A high-performance, real-time transit tracking application for the Société de 
 ### Frontend (`packages/client`)
 
 - **Framework:** React + Vite
-- **API Client:** [Eden Treaty](https://elysiajs.com/eden/treaty.html) (End-to-end type safety directly from the Elysia server)
+- **API Client:** [Eden Treaty](https://elysiajs.com/eden/treaty/overview.html#eden-treaty) (End-to-end type safety directly from the Elysia server)
 - **Mapping:** [MapLibre GL JS](https://maplibre.org/) & `react-map-gl`
 - **State Management:** [Zustand](https://zustand-demo.pmnd.rs/)
 
