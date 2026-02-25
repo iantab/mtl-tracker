@@ -1,0 +1,24 @@
+{
+  "name": "@mtl-tracker/server",
+  "version": "0.0.1",
+  "private": true,
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "dev": "bun run --watch src/index.ts",
+    "start": "bun run src/index.ts"
+  },
+  "dependencies": {
+    "@elysiajs/cors": "latest",
+    "@elysiajs/swagger": "latest",
+    "@mtl-tracker/shared": "workspace:*",
+    "elysia": "latest",
+    "fflate": "^0.8.2",
+    "gtfs-realtime-bindings": "latest",
+    "postgres": "latest"
+  },
+  "devDependencies": {
+    "bun-types": "latest"
+  }
+}
