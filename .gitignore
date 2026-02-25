@@ -1,0 +1,20 @@
+# Environment variables — never commit these
+.env
+.env.local
+.env.*.local
+
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+build/
+
+# Bun
+bun.lockb
+
+# OS
+.DS_Store
+Thumbs.db
+
+.idea/
