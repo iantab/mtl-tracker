@@ -2,5 +2,8 @@
   "name": "@mtl-tracker/shared",
   "version": "0.0.1",
   "private": true,
-  "type": "module"
+  "type": "module",
+  "exports": {
+    ".": "./src/types/transit.ts"
+  }
 }

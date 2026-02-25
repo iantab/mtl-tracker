@@ -28,6 +28,7 @@ class VehicleCache {
       if (!prev) {
         // New vehicle — always include
         changed.push(v);
+        this.store.set(v.id, v); // Update store
         continue;
       }
 
@@ -43,11 +44,9 @@ class VehicleCache {
         headsignChanged
       ) {
         changed.push(v);
+        this.store.set(v.id, v); // Only update baseline when we broadcast
       }
     }
-
-    // Update the store with the full set (so next diff has accurate baselines)
-    this.updateAll(incoming);
 
     return changed;
   }

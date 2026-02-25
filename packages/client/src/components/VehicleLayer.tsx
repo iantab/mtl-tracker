@@ -1,4 +1,4 @@
-import { useCallback, useRef, memo, useState, useEffect } from "react";
+import { useCallback, useRef, memo, useState, useEffect, useMemo } from "react";
 import { useMap } from "react-map-gl/maplibre";
 import { Source, Layer, Popup } from "react-map-gl/maplibre";
 import { useVehicleStore } from "../store/vehicleStore";
@@ -69,13 +69,18 @@ export const VehicleLayer = memo(function VehicleLayer() {
 
   // Filtered view for the animation loop
   const filteredVehicles = useRef(new Map());
-  filteredVehicles.current = new Map(
-    [...vehicles].filter(
-      ([, v]) =>
-        (v.type === "bus" && filters.bus) ||
-        (v.type === "metro" && filters.metro),
-    ),
-  );
+
+  // Update the ref inside a useMemo so we only do work when vehicles/filters change
+  // and we don't create intermediate Maps on every unrelated render.
+  useMemo(() => {
+    filteredVehicles.current = new Map(
+      [...vehicles].filter(
+        ([, v]) =>
+          (v.type === "bus" && filters.bus) ||
+          (v.type === "metro" && filters.metro),
+      ),
+    );
+  }, [vehicles, filters.bus, filters.metro]);
 
   useInterpolation(filteredVehicles.current, getMap);
 
@@ -93,19 +98,31 @@ export const VehicleLayer = memo(function VehicleLayer() {
       if (features.length > 0) {
         map.getCanvas().style.cursor = "pointer";
         const p = features[0].properties as any;
-        setHoverInfo({
-          lng: e.lngLat.lng,
-          lat: e.lngLat.lat,
-          routeId: p.routeId ?? "",
-          type: p.type ?? "",
-          occupancy: p.occupancy ?? "UNKNOWN",
-          delaySec: p.delaySec ?? null,
-          speed: p.speed ?? null,
-          headsign: p.headsign ?? null,
+
+        // Prevent setting state if the same vehicle is already hovered
+        setHoverInfo((prev) => {
+          if (
+            prev?.routeId === p.routeId &&
+            prev?.type === p.type &&
+            prev?.delaySec === p.delaySec &&
+            prev?.speed === p.speed
+          ) {
+            return prev;
+          }
+          return {
+            lng: e.lngLat.lng,
+            lat: e.lngLat.lat,
+            routeId: p.routeId ?? "",
+            type: p.type ?? "",
+            occupancy: p.occupancy ?? "UNKNOWN",
+            delaySec: p.delaySec ?? null,
+            speed: p.speed ?? null,
+            headsign: p.headsign ?? null,
+          };
         });
       } else {
         map.getCanvas().style.cursor = "";
-        setHoverInfo(null);
+        setHoverInfo((prev) => (prev === null ? null : null));
       }
     };
 

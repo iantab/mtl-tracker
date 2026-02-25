@@ -3,11 +3,13 @@ import { vehicleCache } from "../cache/vehicleCache";
 import { registerBroadcast } from "../poller";
 import type { VehicleState, WsMessage } from "../types/transit";
 
-type ElysiaWS = Parameters<
-  Parameters<InstanceType<typeof Elysia>["ws"]>[1]["open"]
->[0];
+import type { ServerWebSocket } from "bun";
 
-const clients = new Set<ElysiaWS>();
+type ElysiaWS = ServerWebSocket<{
+  id: string; // from Elysia WS signature
+}>;
+
+const clients = new Set<any>(); // Elysia types get messy with pure Bun WS type, use any inside the loop for brevity, or just use Set<any> since it's an internal cache
 
 function broadcast(vehicles: VehicleState[]) {
   if (clients.size === 0) return;
